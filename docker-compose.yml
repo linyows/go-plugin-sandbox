@@ -1,0 +1,5 @@
+plugin:
+  build: .
+  volumes:
+    - .:/app
+  command: make
