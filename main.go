@@ -28,14 +28,19 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			name, err := p.Lookup("Name")
-			*name.(*string) = "bee"
-			noise, err := p.Lookup("MakeNoise")
+			nickSymbol, err := p.Lookup("Nick")
 			if err != nil {
 				panic(err)
 			}
-			//fmt.Printf("Name: %#v\n", )
-			noise.(func())()
+			noiseSymbol, err := p.Lookup("MakeNoise")
+			if err != nil {
+				panic(err)
+			}
+			*nickSymbol.(*string) = n
+			//fmt.Printf("new: %#v\n", noise)
+			//fmt.Printf("make: %#v\n", make.(fnc())())
+			makeNoise := noiseSymbol.(func())
+			makeNoise()
 			//}
 		}
 	}

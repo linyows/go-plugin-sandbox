@@ -4,8 +4,25 @@ import (
 	"fmt"
 )
 
-var Name string
+var Nick string
+
+type Noise struct {
+	Type  string
+	Sound string
+}
+
+func init() {
+	fmt.Println("init!")
+}
+
+func Default() *Noise {
+	return &Noise{
+		Type:  "dog",
+		Sound: "bowwow",
+	}
+}
 
 func MakeNoise() {
-	fmt.Println("bowwow!!!!!! > " + Name)
+	n := Default()
+	fmt.Println(n.Type + " < " + n.Sound + "!!!!!! (" + Nick)
 }
