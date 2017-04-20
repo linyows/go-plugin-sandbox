@@ -29,10 +29,13 @@ func main() {
 				panic(err)
 			}
 			name, err := p.Lookup("Name")
+			*name.(*string) = "bee"
+			noise, err := p.Lookup("MakeNoise")
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("Name: %#v\n", name)
+			//fmt.Printf("Name: %#v\n", )
+			noise.(func())()
 			//}
 		}
 	}

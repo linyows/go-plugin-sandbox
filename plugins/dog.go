@@ -1,9 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-var Name = "dog"
+var Name string
 
 func MakeNoise() {
-	fmt.Println("bowwow!!!!!!")
+	fmt.Println("bowwow!!!!!! > " + Name)
 }
