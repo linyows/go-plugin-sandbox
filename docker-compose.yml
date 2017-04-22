@@ -1,5 +1,5 @@
 plugin:
   build: .
   volumes:
-    - .:/app
+    - .:/go/src/github.com/linyows/go-plugin-sandbox
   command: make
