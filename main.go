@@ -3,14 +3,44 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"plugin"
+
+	"github.com/linyows/go-plugin-sandbox/api"
 )
 
+type Toy struct {
+	sounds map[string]api.Sound
+}
+
 func main() {
+	toy := &Toy{
+		sounds: make(map[string]api.Sound),
+	}
+
+	fmt.Fprintln(os.Stdout, "\nPlugins:")
+	if err := toy.LoadSounds(); err != nil {
+		fmt.Errorf("load error:\n", err)
+		os.Exit(1)
+	}
+
+	count := len(toy.sounds)
+	if count < 1 {
+		fmt.Errorf("sounds plugin not found\n")
+		os.Exit(1)
+	}
+
+	fmt.Fprintln(os.Stdout, "\nNoise1:")
+	toy.TurnItOut()
+	fmt.Fprintln(os.Stdout, "\nNoise2:")
+	toy.MakeNoise()
+}
+
+func (t *Toy) LoadSounds() error {
 	files, err := ioutil.ReadDir("./plugins")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	for _, f := range files {
@@ -19,49 +49,45 @@ func main() {
 		}
 		n := f.Name()
 
-		if filepath.Ext(n) == ".so" {
-			//plugin, err := loadPlugin(n)
-			//if err == nil {
-			//execPlugin(plugin)
-			fmt.Println("./plugins/" + n)
-			p, err := plugin.Open("./plugins/" + n)
-			if err != nil {
-				panic(err)
-			}
-			nickSymbol, err := p.Lookup("Nick")
-			if err != nil {
-				panic(err)
-			}
-			noiseSymbol, err := p.Lookup("MakeNoise")
-			if err != nil {
-				panic(err)
-			}
-			*nickSymbol.(*string) = n
-			//fmt.Printf("new: %#v\n", noise)
-			//fmt.Printf("make: %#v\n", make.(fnc())())
-			makeNoise := noiseSymbol.(func())
-			makeNoise()
-			//}
+		if filepath.Ext(n) != ".so" {
+			continue
 		}
+
+		fmt.Println("./plugins/" + n)
+		p, err := plugin.Open("./plugins/" + n)
+		if err != nil {
+			return err
+		}
+
+		soundsSymbol, err := p.Lookup("Sounds")
+		if err != nil {
+			return err
+		}
+
+		sounds := soundsSymbol.(api.Sounds)
+		c := api.Conf{
+			Stdout: os.Stdout,
+		}
+		sounds.Init(c)
+
+		for name, f := range sounds.List() {
+			t.sounds[name] = f
+			fmt.Printf("loaded: %s\n", f.Name())
+		}
+	}
+
+	return nil
+}
+
+func (t *Toy) TurnItOut() {
+	for name, f := range t.sounds {
+		noise := f.Noise()
+		fmt.Printf(api.NoiseFormat1, name, noise)
 	}
 }
 
-//func loadPlugin(f string) (*Plugin, err) {
-//	p, err := plugin.Open("./plugins/" + f)
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return p, err
-//}
-//
-//func execPlugin(p *Plugin) err {
-//	name, err := p.Lookup("Name")
-//
-//	if err == nil {
-//		fmt.Println(name)
-//	}
-//
-//	return err
-//}
+func (t *Toy) MakeNoise() {
+	for _, f := range t.sounds {
+		f.MakeNoise()
+	}
+}
